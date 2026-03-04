@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 
@@ -20,37 +19,34 @@ export function MetricCard({ title, value, trend, trendDirection, icon, delay = 
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 15, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.5, delay, ease: [0.23, 1, 0.32, 1] }}
-            whileHover={{ y: -2, transition: { duration: 0.2 } }}
-            className="group relative flex flex-col justify-between rounded-xl border border-neutral-800/40 bg-neutral-900/20 p-5 shadow-sm transition-all hover:bg-neutral-800/30 hover:border-neutral-700/60"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay, ease: [0.23, 1, 0.32, 1] }}
+            className="group relative flex flex-col justify-between rounded-xl border border-neutral-800/40 bg-[#111111] p-5 transition-all hover:bg-[#141414] hover:border-neutral-700/50"
         >
-            {/* Linear-style top highlight reveal */}
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-            <div className="flex items-center justify-between">
-                <h3 className="text-[13px] font-medium text-neutral-400">{title}</h3>
-                <div className="rounded-md bg-neutral-800/30 p-1.5 text-neutral-500 border border-neutral-800/50 group-hover:text-neutral-300 group-hover:border-neutral-700 group-hover:bg-neutral-800/80 transition-all duration-300 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[12px] font-medium text-neutral-400/90 tracking-wide uppercase">{title}</h3>
+                <div className="text-neutral-500 group-hover:text-neutral-400 transition-colors">
                     {icon}
                 </div>
             </div>
 
-            <div className="mt-5 flex items-baseline gap-3">
+            <div className="flex items-baseline gap-3">
                 <span className="text-2xl font-semibold tracking-tight text-neutral-100 tabular-nums">
                     {value}
                 </span>
             </div>
 
-            <div className="mt-2.5 flex items-center text-[12px] font-medium">
+            <div className="mt-2 text-[11px] font-medium flex items-center gap-1.5">
                 <span
                     className={cn(
-                        isPositive ? "text-green-400" : isNegative ? "text-red-400" : "text-yellow-400"
+                        "inline-flex items-center justify-center pt-[1px]",
+                        isPositive ? "text-green-500" : isNegative ? "text-red-500" : "text-yellow-500"
                     )}
                 >
                     {trend}
                 </span>
-                <span className="ml-1.5 text-neutral-500">vs last week</span>
+                <span className="text-neutral-500">vs last week</span>
             </div>
         </motion.div>
     );

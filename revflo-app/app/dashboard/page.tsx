@@ -8,13 +8,20 @@ import { Activity, Target, Clock, AlertTriangle } from "lucide-react";
 export default function DashboardPage() {
     return (
         <DashboardLayout>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="flex flex-col xl:flex-row gap-6 w-full h-full pb-8">
 
-                {/* Left Column (Main Content) */}
-                <div className="lg:col-span-2 flex flex-col gap-8">
+                {/* Main Content Area (Left/Center) */}
+                <div className="flex-1 flex flex-col gap-6 min-w-0">
+
+                    {/* Header */}
+                    <header className="mb-2">
+                        <h1 className="text-2xl font-semibold text-neutral-100 tracking-tight">Acme Overview</h1>
+                        <p className="text-[13px] text-neutral-500 mt-1">Real-time intelligence on your product execution.</p>
+                    </header>
+
                     <ExecutionScoreCard />
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <MetricCard
                             title="Velocity"
                             value="92%"
@@ -52,12 +59,12 @@ export default function DashboardPage() {
                     <SignalsFeed />
                 </div>
 
-                {/* Right Column (AI Assistant) */}
-                <div className="lg:col-span-1">
-                    <div className="sticky top-24">
+                {/* Right Sidebar Area (AI Assistant) */}
+                <aside className="w-full xl:w-[320px] 2xl:w-[380px] shrink-0">
+                    <div className="sticky top-6">
                         <AIAssistantPanel />
                     </div>
-                </div>
+                </aside>
 
             </div>
         </DashboardLayout>

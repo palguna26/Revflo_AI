@@ -1,13 +1,15 @@
 import React from 'react';
-import { TopNavbar } from './TopNavbar';
+import { Sidebar } from './Sidebar';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="min-h-screen bg-[#0A0A0A] font-sans text-neutral-300 selection:bg-purple-500/30">
-            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-neutral-900/20 via-[#0A0A0A] to-[#0A0A0A] pointer-events-none" />
-            <TopNavbar />
-            <main className="relative mx-auto max-w-7xl px-4 pt-8 pb-16 sm:px-6 lg:px-8">
-                {children}
+        <div className="min-h-screen bg-[#0A0A0A] font-sans text-neutral-300 selection:bg-purple-500/30 flex">
+            <Sidebar />
+            <main className="flex-1 ml-64 min-h-screen flex flex-col items-center">
+                {/* Adjusted to center content within the remaining width like a standard dash */}
+                <div className="w-full max-w-[1400px] px-6 py-8">
+                    {children}
+                </div>
             </main>
         </div>
     );

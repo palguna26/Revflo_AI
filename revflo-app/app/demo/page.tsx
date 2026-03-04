@@ -59,7 +59,7 @@ export default function DemoPage() {
                 {/* AI assistant */}
                 <div>
                     <h2 className="text-lg font-bold mb-2">Product Intelligence AI</h2>
-                    <p className="text-sm text-neutral-500 mb-4">Ask it "What should we build next?" to see the full YC demo flow.</p>
+                    <p className="text-sm text-neutral-500 mb-4">Ask it &quot;What should we build next?&quot; to see the full YC demo flow.</p>
                     <AIChat />
                 </div>
 
