@@ -1,18 +1,14 @@
-PRD
+# RevFlo — gitignore
 
-# Backend secrets
-backend/.env
-backend/__pycache__/
-backend/**/__pycache__/
-backend/**/*.pyc
-.venv/
-venv/
-
-# Frontend
-frontend/.env.local
-frontend/node_modules/
-frontend/dist/
+# Next.js app
+revflo-app/.next/
+revflo-app/node_modules/
+revflo-app/dist/
+revflo-app/.env.local
+revflo-app/.env
 
 # General
 .DS_Store
 *.log
+*.lock
+Thumbs.db
