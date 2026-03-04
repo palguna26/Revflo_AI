@@ -1,7 +1,8 @@
 import { supabase } from './supabase'
 import type { Repository, ExecutionReport, UserProfile } from '../types'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+// All API calls route through same-origin /api/* Vercel serverless functions.
+const API_BASE = '/api'
 
 async function getAuthHeader(): Promise<Record<string, string>> {
     const { data } = await supabase.auth.getSession()
@@ -52,12 +53,13 @@ export const githubCallback = (
     code: string,
     organizationId: string,
 ): Promise<{ status: string; repos_found: number }> =>
-    apiFetch('/github/callback', {
+    apiFetch('/github/oauth', {
         method: 'POST',
         body: JSON.stringify({ code, organization_id: organizationId }),
     })
 
-export const getRepositories = (): Promise<Repository[]> => apiFetch('/github/repositories')
+export const getRepositories = (): Promise<Repository[]> =>
+    apiFetch('/integrations/github').then((r: any) => r.repositories ?? [])
 
 // ── Analysis ──────────────────────────────────────────────────────────────────
 
