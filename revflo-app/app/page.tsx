@@ -98,7 +98,7 @@ export default function LandingPage() {
                 <span className="text-neutral-500">Nobody knows what to build.</span>
               </h2>
               <p className="text-neutral-400 leading-relaxed">
-                With AI accelerating engineering 10x, the bottleneck shifted. The question is no longer "can we build it?" — it's <em>"should we build it?"</em>
+                With AI accelerating engineering 10x, the bottleneck shifted. The question is no longer &quot;can we build it?&quot; — it&apos;s <em>&quot;should we build it?&quot;</em>
               </p>
             </div>
             <div className="space-y-3">

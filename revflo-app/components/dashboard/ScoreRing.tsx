@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
 interface Props { score: number; size?: number }
 
 export function ScoreRing({ score, size = 160 }: Props) {

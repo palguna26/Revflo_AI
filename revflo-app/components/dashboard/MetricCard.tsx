@@ -3,17 +3,18 @@
 import { motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
 interface MetricCardProps {
     title: string;
     value: string;
     trend: string;
     trendDirection: "up" | "down" | "neutral";
-    icon: LucideIcon;
+    icon: ReactNode;
     delay?: number;
 }
 
-export function MetricCard({ title, value, trend, trendDirection, icon: Icon, delay = 0 }: MetricCardProps) {
+export function MetricCard({ title, value, trend, trendDirection, icon, delay = 0 }: MetricCardProps) {
     const isPositive = trendDirection === "up";
     const isNegative = trendDirection === "down";
 
@@ -31,7 +32,7 @@ export function MetricCard({ title, value, trend, trendDirection, icon: Icon, de
             <div className="flex items-center justify-between">
                 <h3 className="text-[13px] font-medium text-neutral-400">{title}</h3>
                 <div className="rounded-md bg-neutral-800/30 p-1.5 text-neutral-500 border border-neutral-800/50 group-hover:text-neutral-300 group-hover:border-neutral-700 group-hover:bg-neutral-800/80 transition-all duration-300 shadow-sm">
-                    <Icon className="h-3.5 w-3.5" />
+                    {icon}
                 </div>
             </div>
 

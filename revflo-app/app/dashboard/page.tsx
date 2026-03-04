@@ -20,7 +20,7 @@ export default function DashboardPage() {
                             value="92%"
                             trend="+3%"
                             trendDirection="up"
-                            icon={Activity}
+                            icon={<Activity className="h-3.5 w-3.5" />}
                             delay={0.1}
                         />
                         <MetricCard
@@ -28,7 +28,7 @@ export default function DashboardPage() {
                             value="88%"
                             trend="+1%"
                             trendDirection="up"
-                            icon={Target}
+                            icon={<Target className="h-3.5 w-3.5" />}
                             delay={0.2}
                         />
                         <MetricCard
@@ -36,7 +36,7 @@ export default function DashboardPage() {
                             value="3.8h"
                             trend="-0.5h"
                             trendDirection="up"
-                            icon={Clock}
+                            icon={<Clock className="h-3.5 w-3.5" />}
                             delay={0.3}
                         />
                         <MetricCard
@@ -44,7 +44,7 @@ export default function DashboardPage() {
                             value="Low"
                             trend="Stable"
                             trendDirection="neutral"
-                            icon={AlertTriangle}
+                            icon={<AlertTriangle className="h-3.5 w-3.5" />}
                             delay={0.4}
                         />
                     </div>
