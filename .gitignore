@@ -12,3 +12,5 @@ revflo-app/.env
 *.log
 *.lock
 Thumbs.db
+
+PRD
