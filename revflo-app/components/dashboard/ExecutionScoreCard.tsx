@@ -3,7 +3,15 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
 
-export function ExecutionScoreCard() {
+interface ExecutionScoreCardProps {
+    score?: number;
+    trendPts?: number;
+    description?: string;
+}
+
+export function ExecutionScoreCard({ score = 0, trendPts = 0, description = "Awaiting execution data based on new insights and product signals." }: ExecutionScoreCardProps) {
+    const isPositive = trendPts >= 0;
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 5 }}
@@ -19,28 +27,29 @@ export function ExecutionScoreCard() {
                             Execution Health
                         </h2>
                         <div className="h-3.5 w-[1px] bg-neutral-800 mx-1" />
-                        <span className="inline-flex items-center rounded-sm bg-green-500/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-green-400 border border-green-500/20">
-                            STRONG
+                        <span className="inline-flex items-center rounded-sm bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-blue-400 border border-blue-500/20">
+                            {score > 0 ? "ACTIVE" : "PENDING"}
                         </span>
                     </div>
 
                     <div className="mt-5 flex items-baseline gap-4">
                         <span className="text-6xl md:text-7xl font-semibold tracking-tighter text-neutral-100 font-sans tabular-nums leading-none">
-                            74
+                            {score}
                         </span>
-                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-green-500/10 border border-green-500/10">
-                            <ArrowUpRight className="h-3.5 w-3.5 text-green-400" />
-                            <span className="text-[12px] font-semibold text-green-400">
-                                +5 pts
-                            </span>
-                        </div>
+                        {score > 0 && (
+                            <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${isPositive ? 'bg-green-500/10 border-green-500/10' : 'bg-red-500/10 border-red-500/10'}`}>
+                                {isPositive && <ArrowUpRight className="h-3.5 w-3.5 text-green-400" />}
+                                <span className={`text-[12px] font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                                    {isPositive ? '+' : ''}{trendPts} pts
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className="hidden lg:flex flex-col gap-2 max-w-sm justify-end h-full">
                     <p className="text-neutral-400 text-[13px] leading-relaxed">
-                        Your team is executing efficiently across the board. <strong className="text-neutral-200 font-medium">Review speed is up</strong>,
-                        and drift risk remains low. Keep up the high velocity to hit Q3 targets.
+                        {description}
                     </p>
                 </div>
             </div>

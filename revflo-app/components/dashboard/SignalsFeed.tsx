@@ -3,42 +3,29 @@
 import { motion } from "framer-motion";
 import { SignalCard, type SignalProps } from "./SignalCard";
 
-const PRODUCT_SIGNALS: SignalProps[] = [
-    {
-        id: "sig-1",
-        title: "Onboarding drop-off detected",
-        description: "Completion rate for the new setup flow dropped by 12% in the last 48 hours.",
-        impact: "High",
-        source: "Database",
-        timeAgo: "2h ago",
-    },
-    {
-        id: "sig-2",
-        title: "Scope drift detected",
-        description: "Feature 'Enterprise SSO' has expanded by 3 PRs outside the original sprint scope.",
-        impact: "Medium",
-        source: "GitHub",
-        timeAgo: "5h ago",
-    },
-    {
-        id: "sig-3",
-        title: "Enterprise traction",
-        description: "New subscription closed: Acme Corp ($24k ARR).",
-        impact: "Low",
-        source: "Stripe",
-        timeAgo: "1d ago",
-    },
-    {
-        id: "sig-4",
-        title: "Mobile experience lagging",
-        description: "Spike in issue reports regarding touch targets on the dashboard layout.",
-        impact: "Medium",
-        source: "Linear",
-        timeAgo: "1d ago",
-    },
-];
+export function SignalsFeed({ signals = [] }: { signals?: SignalProps[] }) {
+    const displaySignals = signals.length > 0 ? signals : [];
 
-export function SignalsFeed() {
+    if (displaySignals.length === 0) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+                className="flex flex-col rounded-xl border border-neutral-800/40 bg-[#111111] p-6"
+            >
+                <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-[12px] font-medium tracking-widest uppercase text-neutral-400">
+                        Signals Feed
+                    </h3>
+                </div>
+                <div className="py-8 text-center text-sm text-neutral-500">
+                    No insights generated yet. Connect integrations or upload feedback to begin analysis.
+                </div>
+            </motion.div>
+        );
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 5 }}
@@ -63,7 +50,7 @@ export function SignalsFeed() {
             </div>
 
             <div className="flex flex-col flex-1 divide-y divide-white/5">
-                {PRODUCT_SIGNALS.map((signal) => (
+                {displaySignals.map((signal) => (
                     <SignalCard key={signal.id} signal={signal} />
                 ))}
             </div>

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { DEMO_FEATURE_RECOMMENDATION } from "@/data/demo-data";
 
 interface Message {
     role: "user" | "assistant";
     content: string;
-    recommendation?: typeof DEMO_FEATURE_RECOMMENDATION;
+    recommendation?: any;
 }
 
 const QUICK_PROMPTS = [
@@ -60,7 +59,7 @@ export function AIChat() {
             response = {
                 role: "assistant",
                 content: matched.text,
-                recommendation: matched.showRec ? DEMO_FEATURE_RECOMMENDATION : undefined,
+                recommendation: undefined,
             };
         } else {
             // Fallback: try real Groq API if key exists, else generic
@@ -118,12 +117,12 @@ export function AIChat() {
                                     <p className="text-xs text-neutral-400 leading-relaxed">{msg.recommendation.reason}</p>
                                     <p className="text-xs text-emerald-400">{msg.recommendation.expected_impact}</p>
                                     <div className="space-y-1.5 pt-1">
-                                        {msg.recommendation.tasks.map(t => (
+                                        {msg.recommendation.tasks.map((t: any) => (
                                             <div key={t.id} className="flex items-center gap-2 text-xs text-neutral-400">
                                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${t.type === 'backend' ? 'bg-blue-500/20 text-blue-400' :
-                                                        t.type === 'frontend' ? 'bg-purple-500/20 text-purple-400' :
-                                                            t.type === 'ai' ? 'bg-indigo-500/20 text-indigo-400' :
-                                                                'bg-neutral-500/20 text-neutral-400'
+                                                    t.type === 'frontend' ? 'bg-purple-500/20 text-purple-400' :
+                                                        t.type === 'ai' ? 'bg-indigo-500/20 text-indigo-400' :
+                                                            'bg-neutral-500/20 text-neutral-400'
                                                     }`}>{t.type}</span>
                                                 <span>{t.title}</span>
                                                 <span className="ml-auto text-neutral-600">{t.estimate}</span>
