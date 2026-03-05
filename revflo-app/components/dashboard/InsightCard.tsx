@@ -1,6 +1,11 @@
-import type { DEMO_INSIGHTS } from "@/data/demo-data";
-
-type Insight = typeof DEMO_INSIGHTS[0];
+interface Insight {
+    type: string;
+    title: string;
+    severity: string;
+    description: string;
+    signal_sources: string[];
+    impact: string;
+}
 
 const TYPE_CONFIG = {
     opportunity: { bg: "bg-emerald-500/10", border: "border-emerald-500/20", badge: "text-emerald-400", icon: "◈" },

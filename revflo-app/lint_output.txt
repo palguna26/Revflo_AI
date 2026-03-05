@@ -1,0 +1,51 @@
+
+> revflo-app@0.1.0 lint
+> eslint
+
+
+E:\RevFlo\revflo-app\app\api\analysis\run\route.ts
+    5:28  warning  'req' is defined but never used           @typescript-eslint/no-unused-vars
+   50:87  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  145:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\RevFlo\revflo-app\app\api\upload\route.ts
+  54:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\RevFlo\revflo-app\app\dashboard\insights\page.tsx
+   7:19   error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  29:123  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\RevFlo\revflo-app\app\dashboard\page.tsx
+  14:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\RevFlo\revflo-app\app\dashboard\settings\page.tsx
+   9:11  warning  'userEmail' is assigned a value but never used                   @typescript-eslint/no-unused-vars
+  29:90  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\RevFlo\revflo-app\app\page.tsx
+    2:22   warning  'PlayCircle' is defined but never used                                  @typescript-eslint/no-unused-vars
+  109:56   error    Comments inside children section of tag should be placed inside braces  react/jsx-no-comment-textnodes
+  110:133  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  110:144  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  110:212  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  110:223  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  111:85   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  111:119  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  112:58   error    Comments inside children section of tag should be placed inside braces  react/jsx-no-comment-textnodes
+  196:121  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`         react/no-unescaped-entities
+  223:80   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  223:92   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  230:82   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+  230:98   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`         react/no-unescaped-entities
+
+E:\RevFlo\revflo-app\components\dashboard\AIAssistantPanel.tsx
+  49:60  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\RevFlo\revflo-app\lib\github\sync.ts
+   3:53  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:71  warning  'token' is defined but never used         @typescript-eslint/no-unused-vars
+
+✖ 28 problems (24 errors, 4 warnings)
+

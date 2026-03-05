@@ -46,11 +46,11 @@ export function AIAssistantPanel() {
                         <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">RevFlo</span>
                         <div className="text-[13px] text-neutral-300 leading-relaxed max-w-[90%]">
                             <p>
-                                Based on current velocity and drift risk, your team is healthy but slowing down on the <strong className="text-white font-medium">Enterprise SSO</strong> initiative.
+                                I am the Intelligence AI. I'll automatically analyze your integrations and uploaded feedback to detect drift, measure velocity, and suggest what to build next.
                             </p>
                             <br />
                             <p className="text-neutral-400">
-                                How can I help you analyze this further?
+                                Connect an integration to get started, or ask me a specific question.
                             </p>
                         </div>
                     </div>

@@ -3,11 +3,9 @@
  * to produce actionable product intelligence.
  */
 
-import type { DEMO_PRS, DEMO_LINEAR_ISSUES, DEMO_STRIPE_EVENTS } from '../data/demo-data'
-
-type PR = typeof DEMO_PRS[0]
-type Issue = typeof DEMO_LINEAR_ISSUES[0]
-type StripeEvent = typeof DEMO_STRIPE_EVENTS[0]
+type PR = { title: string; state: string; additions: number; }
+type Issue = { title: string; priority: string; status: string; }
+type StripeEvent = { type: string; date: string | number | Date; }
 
 export interface ProductSignal {
     source: 'github' | 'linear' | 'jira' | 'stripe'
