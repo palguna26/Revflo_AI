@@ -111,47 +111,49 @@ function IntegrationCard({
             </div>
 
             {/* Inputs */}
-            <div className="space-y-2 mb-3">
-                {type === 'feedback' ? (
-                    <div>
-                        <label className="text-xs text-neutral-500 block mb-1">Upload file (CSV/JSON/TXT) or load demo data</label>
-                        <input
-                            type="file"
-                            accept=".csv,.json,.txt"
-                            onChange={e => setFile(e.target.files?.[0] ?? null)}
-                            className="w-full text-xs text-neutral-400 file:mr-2 file:text-xs file:bg-white/10 file:text-white file:border-0 file:rounded file:px-2 file:py-1 file:cursor-pointer"
-                        />
-                    </div>
-                ) : (
-                    <>
+            {!existing && (
+                <div className="space-y-2 mb-3">
+                    {type === 'feedback' ? (
                         <div>
-                            <label className="text-xs text-neutral-500 block mb-1">
-                                {type === 'stripe' ? 'Stripe Secret Key' : `${INTEGRATION_LABELS[type]?.name} API Token`}
-                                <span className="text-neutral-600 ml-1">(optional — leave blank for demo data)</span>
-                            </label>
+                            <label className="text-xs text-neutral-500 block mb-1">Upload file (CSV/JSON/TXT) or load demo data</label>
                             <input
-                                type="password"
-                                value={token}
-                                onChange={e => setToken(e.target.value)}
-                                placeholder={type === 'stripe' ? 'sk_live_... or sk_test_...' : type === 'github' ? 'ghp_...' : 'lin_api_...'}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-indigo-500/50"
+                                type="file"
+                                accept=".csv,.json,.txt"
+                                onChange={e => setFile(e.target.files?.[0] ?? null)}
+                                className="w-full text-xs text-neutral-400 file:mr-2 file:text-xs file:bg-white/10 file:text-white file:border-0 file:rounded file:px-2 file:py-1 file:cursor-pointer"
                             />
                         </div>
-                        {type === 'github' && (
+                    ) : (
+                        <>
                             <div>
-                                <label className="text-xs text-neutral-500 block mb-1">Repository (owner/name)</label>
+                                <label className="text-xs text-neutral-500 block mb-1">
+                                    {type === 'stripe' ? 'Stripe Secret Key' : `${INTEGRATION_LABELS[type]?.name} API Token`}
+                                    <span className="text-neutral-600 ml-1">(optional — leave blank for demo data)</span>
+                                </label>
                                 <input
-                                    type="text"
-                                    value={repo}
-                                    onChange={e => setRepo(e.target.value)}
-                                    placeholder="e.g. vercel/next.js"
+                                    type="password"
+                                    value={token}
+                                    onChange={e => setToken(e.target.value)}
+                                    placeholder={type === 'stripe' ? 'sk_live_... or sk_test_...' : type === 'github' ? 'ghp_...' : 'lin_api_...'}
                                     className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-indigo-500/50"
                                 />
                             </div>
-                        )}
-                    </>
-                )}
-            </div>
+                            {type === 'github' && (
+                                <div>
+                                    <label className="text-xs text-neutral-500 block mb-1">Repository (owner/name)</label>
+                                    <input
+                                        type="text"
+                                        value={repo}
+                                        onChange={e => setRepo(e.target.value)}
+                                        placeholder="e.g. vercel/next.js"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-indigo-500/50"
+                                    />
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            )}
 
             {message && (
                 <p className={`text-xs mb-2 ${message.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>
@@ -159,10 +161,13 @@ function IntegrationCard({
 
             <button
                 onClick={connect}
-                disabled={loading}
-                className="w-full py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={loading || !!existing}
+                className={`w-full py-1.5 rounded-lg border text-xs transition-colors ${existing
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 cursor-default'
+                        : 'bg-white/5 hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed'
+                    }`}
             >
-                {loading ? '⟳ Syncing...' : existing ? '↻  Re-sync' : `⊕ Connect ${cfg.name}`}
+                {loading ? '⟳ Syncing...' : existing ? '✓ Connected (Demo)' : `⊕ Connect ${cfg.name}`}
             </button>
 
             {existing?.last_synced_at && (

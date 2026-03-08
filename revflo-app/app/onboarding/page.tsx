@@ -26,9 +26,9 @@ export default function OnboardingPage() {
                 {/* Step Indicator */}
                 <div className="mb-6 flex flex-col gap-2">
                     <div className="flex bg-[#222222] h-1 rounded-full overflow-hidden">
-                        <div className="w-1/3 bg-indigo-500 rounded-full"></div>
+                        <div className="w-full bg-indigo-500 rounded-full"></div>
                     </div>
-                    <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-widest text-center">Step 1 of 3: Connect Integrations</p>
+                    <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-widest text-center">Step 2 of 2: Connect Integrations</p>
                 </div>
 
                 {/* Main Card */}

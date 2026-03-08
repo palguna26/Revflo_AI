@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RevFlo — Cursor for Product Managers",
+  title: "RevFlo — Product Intelligence System",
   description: "AI that analyzes your product signals and decides what you should build next.",
   keywords: ["product management", "AI", "roadmap", "product analytics"],
 };
