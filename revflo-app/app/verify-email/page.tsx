@@ -1,62 +1,99 @@
-import { verifyOtp } from './actions'
-import Link from 'next/link'
+'use client'
 
-export default async function VerifyEmailPage({ searchParams }: { searchParams: Promise<{ email?: string; error?: string }> }) {
-    const params = await searchParams;
-    const email = params.email || '';
-    const error = params.error || '';
+import Link from 'next/link'
+import { useState } from 'react'
+
+export default function VerifyEmailPage({
+    searchParams,
+}: {
+    searchParams: { email?: string; error?: string }
+}) {
+    const email = searchParams.email || ''
+    const error = searchParams.error || ''
+    const [resending, setResending] = useState(false)
+    const [resendStatus, setResendStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+    async function handleResend() {
+        if (!email) return
+        setResending(true)
+        setResendStatus('idle')
+
+        try {
+            const formData = new FormData()
+            formData.append('email', email)
+
+            const res = await fetch('/api/auth/resend', {
+                method: 'POST',
+                body: formData
+            })
+
+            if (!res.ok) throw new Error('Failed to resend')
+            setResendStatus('success')
+        } catch (e) {
+            setResendStatus('error')
+        } finally {
+            setResending(false)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-4">
-            <div className="w-full max-w-sm glass rounded-2xl p-8 border border-white/5 space-y-6">
-                <div className="text-center space-y-2">
+            <div className="w-full max-w-sm glass rounded-2xl p-8 border border-white/5 space-y-6 text-center">
+                <div className="space-y-4">
                     <Link href="/" className="inline-block">
                         <span className="text-xl font-bold tracking-tight">
                             Rev<span className="text-indigo-400">Flo</span>
                         </span>
                     </Link>
-                    <h1 className="text-2xl font-semibold tracking-tight">Check your email</h1>
-                    <p className="text-sm text-neutral-400">
-                        We sent a 6-digit code to <span className="text-white font-medium">{email}</span>.
+                    <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-2 border border-emerald-500/20">
+                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-white">Check your email</h1>
+                    <p className="text-sm text-neutral-400 leading-relaxed">
+                        We sent a confirmation link to <br />
+                        <span className="text-white font-medium">{email}</span>
+                        <br />
+                        Click the link to activate your account.
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl text-center">
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl">
                         {error}
                     </div>
                 )}
 
-                <form className="space-y-4 text-center">
-                    <input type="hidden" name="email" value={email} />
-                    <div className="space-y-2">
-                        <label className="text-xs font-medium text-neutral-300 ml-1" htmlFor="code">Confirmation Code</label>
-                        <input
-                            id="code"
-                            name="code"
-                            type="text"
-                            placeholder="123456"
-                            maxLength={6}
-                            required
-                            className="w-full bg-[#111111] border border-white/10 rounded-xl px-4 py-3 text-center text-lg tracking-[0.25em] focus:outline-none focus:border-indigo-500/50 transition-colors"
-                        />
+                {resendStatus === 'success' && (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm px-4 py-3 rounded-xl">
+                        A new confirmation link has been sent.
                     </div>
+                )}
 
-                    <div className="pt-2 flex flex-col gap-3">
-                        <button
-                            formAction={verifyOtp}
-                            className="w-full bg-white text-black font-semibold rounded-xl py-3 hover:bg-neutral-200 transition-colors"
-                        >
-                            Verify & Continue
-                        </button>
+                {resendStatus === 'error' && (
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl">
+                        Failed to resend. Please try again later.
                     </div>
-                </form>
+                )}
 
-                <div className="text-center text-sm text-neutral-400 mt-4">
-                    Didn't receive the code?{' '}
-                    <button className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                        Click to resend
+                <div className="pt-4 border-t border-white/5 space-y-4">
+                    <p className="text-sm text-neutral-500">
+                        Didn't receive the email?
+                    </p>
+                    <button
+                        onClick={handleResend}
+                        disabled={resending || !email}
+                        className="w-full bg-white/5 text-white font-medium rounded-xl py-3 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-white/10"
+                    >
+                        {resending ? 'Sending...' : 'Resend confirmation email'}
                     </button>
+
+                    <div className="pt-2">
+                        <Link href="/login" className="text-sm text-neutral-400 hover:text-white transition-colors">
+                            Return to sign in
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
