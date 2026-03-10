@@ -27,7 +27,7 @@ export async function POST() {
 
         if (!signals || signals.length === 0) {
             return NextResponse.json(
-                { error: 'No signals found. Connect an integration or load demo data first.' },
+                { error: 'No signals found. Connect an integration from the Integrations page first.' },
                 { status: 400 }
             )
         }

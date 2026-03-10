@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     // userEmail specifically handles the placeholder local dev state
     const userEmail = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')
         ? 'founder@acme.ai'
-        : (user?.email || 'demo@revflo.ai');
+        : (user?.email || '');
 
     if (!user && !process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         redirect('/login');

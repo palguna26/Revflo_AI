@@ -67,68 +67,6 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
-
-        {/* Hero UI Component Mockup */}
-        <div className="w-full max-w-5xl mx-auto mt-24 px-4 relative z-10 perspective-[1000px]">
-          <div className="w-full bg-[#0A0A0A] border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative" style={{ transform: 'rotateX(2deg) translateY(0)' }}>
-            {/* Fake Browser Top */}
-            <div className="h-10 border-b border-white/5 bg-[#111] flex items-center px-4 gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
-              <div className="ml-4 flex-1 h-5 bg-white/5 rounded-md"></div>
-            </div>
-            {/* Dashboard Overview */}
-            <div className="p-8">
-              {/* Top metrics row */}
-              <div className="grid grid-cols-3 gap-6 mb-8">
-                <div className="bg-[#111] border border-white/5 rounded-xl p-5">
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-2">Execution Score</p>
-                  <div className="flex items-end gap-2">
-                    <h3 className="text-3xl font-semibold text-white tracking-tighter">98<span className="text-xl text-neutral-500">/100</span></h3>
-                  </div>
-                </div>
-                <div className="bg-[#111] border border-white/5 rounded-xl p-5">
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-2">Drift Risk</p>
-                  <h3 className="text-2xl font-semibold text-emerald-400 tracking-tight">Low</h3>
-                </div>
-                <div className="bg-[#111] border border-white/5 rounded-xl p-5">
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-2">Product Velocity</p>
-                  <h3 className="text-2xl font-semibold text-white tracking-tight">14.2<span className="text-lg text-neutral-500">x</span></h3>
-                </div>
-              </div>
-
-              {/* Bottom row */}
-              <div className="grid grid-cols-12 gap-6">
-                <div className="col-span-8 bg-[#111] border border-white/5 rounded-xl p-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-4">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">AI Insight</span>
-                  </div>
-                  <h4 className="text-[11px] font-bold tracking-widest uppercase text-neutral-500 mb-4">AI Action Recommendation</h4>
-                  <div className="font-mono text-[13px] text-green-400 mt-2 space-y-1 opacity-90">
-                    <p><span className="text-blue-400">// Strategic Drift Detected</span></p>
-                    <p><span className="text-pink-400">if</span> (active_sprint.features.includes(<span className="text-yellow-300">"websockets"</span>) && roadmap.priority !== <span className="text-yellow-300">"websockets"</span>) {"{"}</p>
-                    <p className="pl-4">recommend(<span className="text-yellow-300">"Pivot to Performance Optimization"</span>);</p>
-                    <p className="pl-4 text-neutral-500">// 14 PRs redirected by this expression</p>
-                    <p>{"}"}</p>
-                  </div>
-                </div>
-                <div className="col-span-4 bg-[#111] border border-white/5 rounded-xl p-6 flex flex-col items-center justify-center relative">
-                  <div className="relative w-24 h-24 mb-4">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="40" fill="transparent" stroke="#222" strokeWidth="8" />
-                      <circle cx="50" cy="50" r="40" fill="transparent" stroke="#6366f1" strokeWidth="8" strokeDasharray="251.2" strokeDashoffset="15" strokeLinecap="round" className="opacity-90 drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-2xl font-bold tracking-tighter text-white">94%</span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] text-neutral-400 font-medium">Velocity Score</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* ── Integrations Section ── */}

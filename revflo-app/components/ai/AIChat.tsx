@@ -15,28 +15,11 @@ const QUICK_PROMPTS = [
     "Break down the next sprint",
 ];
 
-const DEMO_RESPONSES: Record<string, { text: string; showRec?: boolean }> = {
-    "What should we build next?": {
-        text: "Based on your product signals, I've analyzed 20 PRs, 15 Linear issues, and 10 Stripe events. Here's my recommendation:",
-        showRec: true,
-    },
-    "Where is our biggest risk?": {
-        text: "Your biggest risk is **scope drift**. 2 large PRs (612 + 532 LOC) are building real-time collaboration features that aren't on your Q1 roadmap. This represents ~1,100 lines of unplanned engineering work.\n\nAdditionally, your Q1 priority 'Mobile experience' has 45% roadmap alignment with no active PRs — it's being systematically de-prioritized without explicit acknowledgment.",
-    },
-    "Write a spec for the top feature": {
-        text: "Here's a product spec based on your highest-signal opportunity:",
-        showRec: true,
-    },
-    "Break down the next sprint": {
-        text: "Based on your Linear issues and open PRs, here's a recommended 2-week sprint:\n\n**Week 1 — Onboarding (Impact: High)**\n• Role detection on signup (2d)\n• Adaptive onboarding flow (3d)\n\n**Week 2 — Enterprise (Revenue: High)**\n• Jira epic mapping to roadmap (2d)\n• Team workspace sharing (3d)\n\nThis sprint targets your top growth lever (activation) and top revenue opportunity (enterprise expansion). Estimated output: +40% trial conversion, 2 enterprise accounts closer to expand.",
-    },
-};
-
 export function AIChat() {
     const [messages, setMessages] = useState<Message[]>([
         {
             role: "assistant",
-            content: "I've analyzed your product signals. Your execution score is **74/100**. Top finding: onboarding drop-off is your highest ROI fix. Ask me anything about your product.",
+            content: "I'm the Product Intelligence AI. Ask me anything about your product, signals, or roadmap.",
         },
     ]);
     const [input, setInput] = useState("");
@@ -50,41 +33,33 @@ export function AIChat() {
         setMessages((m) => [...m, userMsg]);
         setLoading(true);
 
-        // Simulate network latency
-        await new Promise((r) => setTimeout(r, 900 + Math.random() * 600));
+        try {
+            const res = await fetch("/api/ai/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text }),
+            });
 
-        let response: Message;
-        const matched = DEMO_RESPONSES[text];
-        if (matched) {
-            response = {
-                role: "assistant",
-                content: matched.text,
-                recommendation: undefined,
-            };
-        } else {
-            // Fallback: try real Groq API if key exists, else generic
-            try {
-                const res = await fetch("/api/ai/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: text, context: "demo" }),
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    response = { role: "assistant", content: data.reply };
-                } else {
-                    throw new Error("no api");
-                }
-            } catch {
-                response = {
-                    role: "assistant",
-                    content: `Great question. Based on your signals:\n\n• **Execution score**: 74/100 (↑5 this week)\n• **Top risk**: Scope drift in collaboration features\n• **Top opportunity**: Onboarding completion (34% → target 70%)\n\nWant me to generate a feature spec or sprint breakdown?`,
-                };
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || "Failed to fetch response");
             }
-        }
 
-        setMessages((m) => [...m, response]);
-        setLoading(false);
+            const data = await res.json();
+
+            setMessages((m) => [...m, {
+                role: "assistant",
+                content: data.reply || "I couldn't generate a response based on the current data.",
+                recommendation: data.recommendation
+            }]);
+        } catch (error: any) {
+            setMessages((m) => [...m, {
+                role: "assistant",
+                content: `Error: ${error.message}. Please make sure you have connected integrations to pull actual product signals.`
+            }]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -117,7 +92,7 @@ export function AIChat() {
                                     <p className="text-xs text-neutral-400 leading-relaxed">{msg.recommendation.reason}</p>
                                     <p className="text-xs text-emerald-400">{msg.recommendation.expected_impact}</p>
                                     <div className="space-y-1.5 pt-1">
-                                        {msg.recommendation.tasks.map((t: any) => (
+                                        {msg.recommendation.tasks?.map((t: any) => (
                                             <div key={t.id} className="flex items-center gap-2 text-xs text-neutral-400">
                                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${t.type === 'backend' ? 'bg-blue-500/20 text-blue-400' :
                                                     t.type === 'frontend' ? 'bg-purple-500/20 text-purple-400' :
