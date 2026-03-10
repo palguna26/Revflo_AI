@@ -217,6 +217,15 @@ Return ONLY valid JSON with 3-5 tasks per category:
             .select()
             .single()
 
+        // Update workspace metadata
+        await supabase
+            .from('workspaces')
+            .update({
+                last_analyzed_at: new Date().toISOString(),
+                new_signals_count: 0
+            })
+            .eq('id', workspace.id)
+
         return NextResponse.json({
             success: true,
             insights: savedInsights.filter(Boolean),

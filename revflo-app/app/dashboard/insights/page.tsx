@@ -8,6 +8,8 @@ interface Insight {
     description: string
     insight_type: 'opportunity' | 'risk' | 'trend'
     confidence_score: number
+    signal_count?: number
+    source_count?: number
     created_at: string
 }
 
@@ -56,8 +58,8 @@ export default function InsightsPage() {
                         key={type}
                         onClick={() => setFilter(type)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize ${filter === type
-                                ? 'bg-indigo-600 text-white'
-                                : 'text-neutral-500 hover:text-neutral-300 bg-white/5 hover:bg-white/10'
+                            ? 'bg-indigo-600 text-white'
+                            : 'text-neutral-500 hover:text-neutral-300 bg-white/5 hover:bg-white/10'
                             }`}
                     >
                         {type}
@@ -81,16 +83,16 @@ export default function InsightsPage() {
 
             {/* Empty */}
             {!loading && filtered.length === 0 && (
-                <div className="rounded-xl border border-dashed border-white/10 p-10 text-center">
-                    <p className="text-neutral-400 text-sm">No insights yet.</p>
-                    <p className="text-neutral-600 text-xs mt-1">
+                <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-10 text-center">
+                    <p className="text-white font-medium mb-2">No insights yet.</p>
+                    <p className="text-neutral-400 text-sm">
                         {insights.length === 0
-                            ? 'Connect integrations and run analysis from the dashboard.'
+                            ? 'Run AI Analysis from the Overview to generate patterns from your signals.'
                             : `No ${filter} insights found.`}
                     </p>
                     {insights.length === 0 && (
-                        <a href="/dashboard" className="mt-3 inline-flex text-indigo-400 text-sm hover:text-indigo-300">
-                            ← Go to Dashboard
+                        <a href="/dashboard" className="mt-4 inline-block px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors">
+                            ◆ Go to Overview
                         </a>
                     )}
                 </div>
@@ -119,30 +121,12 @@ export default function InsightsPage() {
                                         <h3 className="text-sm font-semibold text-white mb-1.5">{insight.title}</h3>
                                         <p className="text-xs text-neutral-400 leading-relaxed">{insight.description}</p>
                                     </div>
-                                    {/* Confidence Score */}
-                                    <div className="flex flex-col items-center shrink-0">
-                                        <div className="relative w-12 h-12">
-                                            <svg className="w-12 h-12 -rotate-90" viewBox="0 0 36 36">
-                                                <circle
-                                                    cx="18" cy="18" r="15.9"
-                                                    fill="none" stroke="rgba(255,255,255,0.05)"
-                                                    strokeWidth="2.5"
-                                                />
-                                                <circle
-                                                    cx="18" cy="18" r="15.9"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2.5"
-                                                    strokeLinecap="round"
-                                                    strokeDasharray={`${insight.confidence_score} 100`}
-                                                    className={insight.confidence_score >= 80 ? 'text-emerald-500' : insight.confidence_score >= 60 ? 'text-amber-500' : 'text-red-500'}
-                                                />
-                                            </svg>
-                                            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
-                                                {insight.confidence_score}
-                                            </span>
+                                    {/* Signal Source Evidence Label */}
+                                    <div className="flex flex-col items-end shrink-0">
+                                        <div className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-right">
+                                            <p className="text-xs text-neutral-300 font-medium">Based on {insight.signal_count || 0} signals</p>
+                                            <p className="text-[10px] text-neutral-500">from {insight.source_count || 0} sources</p>
                                         </div>
-                                        <p className="text-[9px] text-neutral-600 mt-1">confidence</p>
                                     </div>
                                 </div>
                             </div>

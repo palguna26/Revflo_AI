@@ -1,14 +1,16 @@
 import { createClient } from "@/utils/supabase/server";
+import { AutoAnalyzeToggle } from "@/components/dashboard/AutoAnalyzeToggle";
 
 export default async function SettingsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { data: workspace } = await supabase.from('workspaces').select('name').limit(1).single();
+    const { data: workspace } = await supabase.from('workspaces').select('name, workspace_settings').limit(1).single();
 
     const userEmail = user?.email || '';
     const workspaceName = workspace?.name || 'Your Workspace';
     const domainPrefix = workspaceName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const autoAnalyze = workspace?.workspace_settings?.auto_analyze || false;
 
     return (
         <div className="flex h-full">
@@ -51,6 +53,11 @@ export default async function SettingsPage() {
                                 .revflo.ai
                             </div>
                         </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-white/10">
+                        <h2 className="text-sm font-semibold tracking-tight mb-4">Automation</h2>
+                        <AutoAnalyzeToggle initialValue={autoAnalyze} />
                     </div>
                 </div>
 

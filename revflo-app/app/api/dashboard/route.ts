@@ -8,7 +8,12 @@ export async function GET() {
         const workspace = await ensureWorkspace(supabase)
         const wid = workspace.id
 
-        const [signalsRes, insightsRes, recsRes, prdsRes, integrationsRes] = await Promise.all([
+        const [wsInfoRes, signalsRes, insightsRes, recsRes, prdsRes, integrationsRes] = await Promise.all([
+            supabase
+                .from('workspaces')
+                .select('last_analyzed_at, new_signals_count, workspace_settings')
+                .eq('id', wid)
+                .single(),
             supabase
                 .from('product_signals')
                 .select('signal_type, source', { count: 'exact', head: false })
@@ -51,6 +56,9 @@ export async function GET() {
             top_insights: insightsRes.data ?? [],
             top_recommendations: recsRes.data ?? [],
             integrations: integrationsRes.data ?? [],
+            last_analyzed_at: wsInfoRes.data?.last_analyzed_at ?? null,
+            new_signals_count: wsInfoRes.data?.new_signals_count ?? 0,
+            workspace_settings: wsInfoRes.data?.workspace_settings ?? {}
         })
     } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Unknown error'

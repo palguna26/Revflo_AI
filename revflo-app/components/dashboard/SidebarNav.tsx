@@ -7,7 +7,8 @@ const NAV = [
     { href: "/dashboard", label: "Overview", icon: "⬡" },
     { href: "/dashboard/integrations", label: "Integrations", icon: "⊕" },
     { href: "/dashboard/insights", label: "Insights", icon: "◉" },
-    { href: "/dashboard/analysis", label: "Recommendations", icon: "◈" },
+    { href: "/dashboard/decision-log", label: "Decision Log", icon: "◇" },
+    { href: "/dashboard/analysis", label: "Build Decisions", icon: "◈" },
     { href: "/dashboard/settings", label: "Settings", icon: "⌥" },
 ];
 

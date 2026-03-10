@@ -12,6 +12,9 @@ interface Stats {
     top_insights: Array<{ id: string; title: string; confidence_score: number; insight_type: string }>
     top_recommendations: Array<{ id: string; feature_name: string; priority_score: number }>
     integrations: Array<{ type: string; status: string; signal_count: number; last_synced_at: string }>
+    last_analyzed_at: string | null
+    new_signals_count: number
+    workspace_settings: any
 }
 
 const INSIGHT_TYPE_COLOR: Record<string, string> = {
@@ -70,7 +73,7 @@ export default function DashboardPage() {
     const statCards = stats ? [
         { label: 'Product Signals', value: stats.signal_count, color: 'from-indigo-500/20 to-purple-500/20', border: 'border-indigo-500/30' },
         { label: 'Insights Generated', value: stats.insight_count, color: 'from-emerald-500/20 to-teal-500/20', border: 'border-emerald-500/30' },
-        { label: 'Recommendations', value: stats.recommendation_count, color: 'from-amber-500/20 to-orange-500/20', border: 'border-amber-500/30' },
+        { label: 'Build Decisions', value: stats.recommendation_count, color: 'from-amber-500/20 to-orange-500/20', border: 'border-amber-500/30' },
         { label: 'PRDs Created', value: stats.prd_count, color: 'from-blue-500/20 to-cyan-500/20', border: 'border-blue-500/30' },
     ] : []
 
@@ -80,24 +83,48 @@ export default function DashboardPage() {
             <div className="flex items-start justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-white">Product Intelligence</h1>
-                    <p className="text-sm text-neutral-500 mt-0.5">
-                        {stats?.workspace.name ?? 'Loading workspace...'}
-                    </p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                        <p className="text-sm text-neutral-500">
+                            {stats?.workspace.name ?? 'Loading workspace...'}
+                        </p>
+                        {stats?.last_analyzed_at && (
+                            <span className="text-[10px] text-neutral-600 bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                                Last analyzed: {new Date(stats.last_analyzed_at).toLocaleDateString()}
+                            </span>
+                        )}
+                        {stats?.workspace_settings?.auto_analyze && (
+                            <span className="text-[10px] text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/20">
+                                Auto-analyze ON
+                            </span>
+                        )}
+                    </div>
                 </div>
-                <button
-                    onClick={runAnalysis}
-                    disabled={running || !stats || stats.signal_count === 0}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
-                >
-                    {running ? (
-                        <>
-                            <span className="animate-spin">◌</span>
-                            Running Analysis...
-                        </>
-                    ) : (
-                        <>◆ Run AI Analysis</>
+                <div className="flex items-center gap-4">
+                    {stats && stats.new_signals_count > 0 && (
+                        <div className="text-xs text-neutral-400">
+                            <span className="font-medium text-white">{stats.new_signals_count}</span> new signals since last analysis
+                        </div>
                     )}
-                </button>
+                    <button
+                        onClick={runAnalysis}
+                        disabled={running || !stats || stats.signal_count === 0}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${stats?.new_signals_count && stats.new_signals_count >= 5
+                                ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                                : 'bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed'
+                            }`}
+                    >
+                        {running ? (
+                            <>
+                                <span className="animate-spin">◌</span>
+                                Running Analysis...
+                            </>
+                        ) : stats?.new_signals_count && stats.new_signals_count >= 5 ? (
+                            <>◆ {stats.new_signals_count} new signals — refresh analysis</>
+                        ) : (
+                            <>◆ Run AI Analysis</>
+                        )}
+                    </button>
+                </div>
             </div>
 
             {/* Status message */}
@@ -117,8 +144,8 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* Stat Cards */}
-            {!loading && stats && stats.signal_count > 0 && (
+            {/* Stat Cards - Only show if analysis has run */}
+            {!loading && stats && stats.signal_count > 0 && (stats.insight_count > 0 || stats.recommendation_count > 0 || stats.prd_count > 0) && (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {statCards.map(card => (
                         <div key={card.label} className={`rounded-xl border ${card.border} bg-gradient-to-br ${card.color} p-4`}>
@@ -126,6 +153,21 @@ export default function DashboardPage() {
                             <p className="text-3xl font-bold text-white mt-1">{card.value}</p>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Zero state for stats - when signals exist but analysis hasn't been run */}
+            {!loading && stats && stats.signal_count > 0 && stats.insight_count === 0 && stats.recommendation_count === 0 && stats.prd_count === 0 && (
+                <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-8 text-center">
+                    <h3 className="text-lg font-medium text-white mb-2">Ready to Analyze</h3>
+                    <p className="text-neutral-400 text-sm mb-4">Run your first AI Analysis to generate insights, decisions, and PRDs from your connected signals.</p>
+                    <button
+                        onClick={runAnalysis}
+                        disabled={running}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors"
+                    >
+                        {running ? 'Running Analysis...' : '◆ Run AI Analysis'}
+                    </button>
                 </div>
             )}
 
@@ -209,7 +251,7 @@ export default function DashboardPage() {
                     {stats.top_recommendations.length > 0 && (
                         <div className="rounded-xl border border-white/5 bg-white/5 p-4">
                             <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-sm font-semibold text-white">Top Features to Build</h2>
+                                <h2 className="text-sm font-semibold text-white">Top Build Decisions</h2>
                                 <a href="/dashboard/analysis" className="text-xs text-indigo-400 hover:text-indigo-300">View all →</a>
                             </div>
                             <div className="space-y-2">

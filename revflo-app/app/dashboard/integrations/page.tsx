@@ -1,19 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 interface Integration {
-    type: string
-    status: string
-    signal_count: number
-    last_synced_at: string | null
+    provider: string
+    status?: string
+    signal_count?: number
+    last_synced_at?: string | null
 }
 
 const INTEGRATION_LABELS: Record<string, { name: string; icon: string; description: string; color: string }> = {
     github: { name: 'GitHub', icon: '◈', description: 'PRs, commits, and engineering activity', color: 'indigo' },
     linear: { name: 'Linear', icon: '◆', description: 'Issues, roadmap items, and priorities', color: 'violet' },
-    stripe: { name: 'Stripe', icon: '◇', description: 'Revenue events, upgrades, and churn', color: 'emerald' },
-    feedback: { name: 'Customer Feedback', icon: '◎', description: 'CSV/JSON feedback files', color: 'amber' },
+    csv: { name: 'Customer Feedback', icon: '◎', description: 'Upload raw CSV feedback files', color: 'amber' },
 }
 
 function IntegrationCard({
@@ -28,74 +27,77 @@ function IntegrationCard({
     const cfg = INTEGRATION_LABELS[type]!
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState('')
-    const [token, setToken] = useState('')
-    const [repo, setRepo] = useState('')
-    const [file, setFile] = useState<File | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
-    async function connect() {
+    async function handleConnect() {
+        if (type === 'github') {
+            window.location.href = '/api/integrations/github/connect'
+        } else if (type === 'linear') {
+            window.location.href = '/api/integrations/linear/connect'
+        }
+    }
+
+    async function handleSync() {
+        if (type === 'csv') return // Handled via upload
         setLoading(true)
         setMessage('')
         try {
-            let res: Response
-
-            if (type === 'feedback') {
-                if (file) {
-                    const fd = new FormData()
-                    fd.append('file', file)
-                    res = await fetch('/api/upload', { method: 'POST', body: fd })
-                } else {
-                    // Load demo feedback
-                    res = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
-                }
-            } else if (type === 'github') {
-                res = await fetch('/api/integrations/github', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: token || 'demo', repo: repo || 'demo' }),
-                })
-            } else if (type === 'linear') {
-                res = await fetch('/api/integrations/linear', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: token || 'demo' }),
-                })
-            } else {
-                res = await fetch('/api/integrations/stripe', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key: token || 'demo' }),
-                })
-            }
-
+            const res = await fetch('/api/integrations/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ provider: type })
+            })
             const data = await res.json()
-            if (!res.ok) throw new Error(data.error)
-            setMessage(`✓ ${data.signals ?? data.count ?? 'Demo'} signals synced!`)
+            if (!res.ok) throw new Error(data.error || 'Failed to sync')
+            setMessage(`✓ ${data.count} new signals synced!`)
             onSync()
-        } catch (e: unknown) {
-            const msg = e instanceof Error ? e.message : 'Failed'
-            setMessage('✗ ' + msg)
+        } catch (e: any) {
+            setMessage('✗ ' + (e.message || 'Sync failed'))
         } finally {
             setLoading(false)
+        }
+    }
+
+    async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setLoading(true)
+        setMessage('')
+        try {
+            const fd = new FormData()
+            fd.append('file', file)
+            const res = await fetch('/api/integrations/feedback/upload', {
+                method: 'POST',
+                body: fd
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Upload failed')
+            setMessage(`✓ ${data.count} records ingested!`)
+            onSync()
+        } catch (err: any) {
+            setMessage('✗ ' + (err.message || 'Upload failed'))
+        } finally {
+            setLoading(false)
+            if (fileInputRef.current) fileInputRef.current.value = ''
         }
     }
 
     const colorMap: Record<string, string> = {
         indigo: 'border-indigo-500/30 bg-indigo-500/5',
         violet: 'border-violet-500/30 bg-violet-500/5',
-        emerald: 'border-emerald-500/30 bg-emerald-500/5',
         amber: 'border-amber-500/30 bg-amber-500/5',
     }
 
     const iconColorMap: Record<string, string> = {
         indigo: 'text-indigo-400',
         violet: 'text-violet-400',
-        emerald: 'text-emerald-400',
         amber: 'text-amber-400',
     }
 
     return (
         <div className={`rounded-xl border p-5 ${colorMap[cfg.color]}`}>
-            <div className="flex items-start justify-between mb-3">
+            <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-2.5">
                     <span className={`text-lg ${iconColorMap[cfg.color]}`}>{cfg.icon}</span>
                     <div>
@@ -105,74 +107,53 @@ function IntegrationCard({
                 </div>
                 {existing && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        ✓ {existing.signal_count} signals
+                        Total {existing.signal_count} signals
                     </span>
                 )}
             </div>
 
-            {/* Inputs */}
-            {!existing && (
-                <div className="space-y-2 mb-3">
-                    {type === 'feedback' ? (
-                        <div>
-                            <label className="text-xs text-neutral-500 block mb-1">Upload file (CSV/JSON/TXT) or load demo data</label>
-                            <input
-                                type="file"
-                                accept=".csv,.json,.txt"
-                                onChange={e => setFile(e.target.files?.[0] ?? null)}
-                                className="w-full text-xs text-neutral-400 file:mr-2 file:text-xs file:bg-white/10 file:text-white file:border-0 file:rounded file:px-2 file:py-1 file:cursor-pointer"
-                            />
-                        </div>
-                    ) : (
-                        <>
-                            <div>
-                                <label className="text-xs text-neutral-500 block mb-1">
-                                    {type === 'stripe' ? 'Stripe Secret Key' : `${INTEGRATION_LABELS[type]?.name} API Token`}
-                                    <span className="text-neutral-600 ml-1">(optional — leave blank for demo data)</span>
-                                </label>
-                                <input
-                                    type="password"
-                                    value={token}
-                                    onChange={e => setToken(e.target.value)}
-                                    placeholder={type === 'stripe' ? 'sk_live_... or sk_test_...' : type === 'github' ? 'ghp_...' : 'lin_api_...'}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-indigo-500/50"
-                                />
-                            </div>
-                            {type === 'github' && (
-                                <div>
-                                    <label className="text-xs text-neutral-500 block mb-1">Repository (owner/name)</label>
-                                    <input
-                                        type="text"
-                                        value={repo}
-                                        onChange={e => setRepo(e.target.value)}
-                                        placeholder="e.g. vercel/next.js"
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-indigo-500/50"
-                                    />
-                                </div>
-                            )}
-                        </>
-                    )}
+            {/* Inputs / Upload */}
+            {type === 'csv' && (
+                <div className="mb-4">
+                    <input
+                        type="file"
+                        accept=".csv"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        disabled={loading}
+                        className="w-full text-xs text-neutral-400 file:mr-2 file:text-xs file:bg-white/10 file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:cursor-pointer file:hover:bg-white/20 transition-colors"
+                    />
                 </div>
             )}
 
             {message && (
-                <p className={`text-xs mb-2 ${message.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>
+                <p className={`text-xs mb-3 font-medium ${message.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>
             )}
 
-            <button
-                onClick={connect}
-                disabled={loading || !!existing}
-                className={`w-full py-1.5 rounded-lg border text-xs transition-colors ${existing
-                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 cursor-default'
-                        : 'bg-white/5 hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed'
-                    }`}
-            >
-                {loading ? '⟳ Syncing...' : existing ? '✓ Connected (Demo)' : `⊕ Connect ${cfg.name}`}
-            </button>
+            <div className="flex items-center gap-3">
+                {type === 'csv' ? null : existing ? (
+                    <button
+                        onClick={handleSync}
+                        disabled={loading}
+                        className="w-full py-1.5 rounded-lg border text-xs font-medium transition-colors bg-white/5 hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        {loading ? '⟳ Syncing...' : '⟳ Sync Now'}
+                    </button>
+                ) : (
+                    <button
+                        onClick={handleConnect}
+                        disabled={loading}
+                        className={`w-full py-1.5 rounded-lg text-xs font-medium transition-colors text-white ${type === 'github' ? 'bg-[#24292e] hover:bg-[#2f363d]' : 'bg-[#5e6ad2] hover:bg-[#6c78e6]'
+                            }`}
+                    >
+                        ⊕ Connect {cfg.name}
+                    </button>
+                )}
+            </div>
 
             {existing?.last_synced_at && (
-                <p className="text-[10px] text-neutral-600 mt-1.5 text-right">
-                    Last synced: {new Date(existing.last_synced_at).toLocaleString()}
+                <p className="text-[10px] text-neutral-500 mt-2.5 text-center">
+                    Last activity: {new Date(existing.last_synced_at).toLocaleString()}
                 </p>
             )}
         </div>
@@ -184,13 +165,33 @@ export default function IntegrationsPage() {
     const [loading, setLoading] = useState(true)
 
     async function loadIntegrations() {
-        const res = await fetch('/api/integrations/status')
-        const data = await res.json()
-        setIntegrations(data.integrations ?? [])
-        setLoading(false)
+        try {
+            const res = await fetch('/api/integrations')
+            const data = await res.json()
+            setIntegrations(data.integrations ?? [])
+        } catch (e) {
+            console.error('Failed to load integrations')
+        } finally {
+            setLoading(false)
+        }
     }
 
-    useEffect(() => { loadIntegrations() }, [])
+    useEffect(() => {
+        loadIntegrations()
+
+        // Handle OAuth success/error callbacks in URL
+        const params = new URLSearchParams(window.location.search)
+        const error = params.get('error')
+        const success = params.get('success')
+
+        if (error) {
+            setTimeout(() => alert(`Integration error: ${error}`), 100)
+            window.history.replaceState({}, '', '/dashboard/integrations')
+        } else if (success) {
+            setTimeout(() => alert(`Successfully integrated ${success.split('_')[0]}!`), 100)
+            window.history.replaceState({}, '', '/dashboard/integrations')
+        }
+    }, [])
 
     const totalSignals = integrations.reduce((sum, i) => sum + (i.signal_count ?? 0), 0)
 
@@ -205,18 +206,18 @@ export default function IntegrationsPage() {
             </div>
 
             {loading ? (
-                <div className="grid sm:grid-cols-2 gap-4">
-                    {[...Array(4)].map((_, i) => (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(3)].map((_, i) => (
                         <div key={i} className="rounded-xl border border-white/5 bg-white/5 h-40 animate-pulse" />
                     ))}
                 </div>
             ) : (
-                <div className="grid sm:grid-cols-2 gap-4">
-                    {(['github', 'linear', 'stripe', 'feedback'] as const).map(type => (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {(['github', 'linear', 'csv']).map(type => (
                         <IntegrationCard
                             key={type}
                             type={type}
-                            existing={integrations.find(i => i.type === type) ?? null}
+                            existing={integrations.find(i => i.provider === type) ?? null}
                             onSync={loadIntegrations}
                         />
                     ))}
@@ -224,7 +225,7 @@ export default function IntegrationsPage() {
             )}
 
             {totalSignals > 0 && (
-                <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 text-center">
+                <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 text-center mt-6">
                     <p className="text-sm text-neutral-300">
                         <span className="text-indigo-400 font-semibold">{totalSignals} signals</span> collected.{' '}
                         <a href="/dashboard" className="text-indigo-400 hover:text-indigo-300 underline-offset-2 hover:underline">

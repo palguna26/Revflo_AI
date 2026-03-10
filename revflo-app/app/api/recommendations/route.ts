@@ -13,6 +13,7 @@ export async function GET() {
             .from('feature_recommendations')
             .select(`
         *,
+        decision_records ( * ),
         prds (
           *,
           engineering_plans ( * )
