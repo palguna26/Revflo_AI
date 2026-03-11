@@ -14,7 +14,7 @@ interface Stats {
     prd_count: number
     top_insights: Array<{ id: string; title: string; confidence_score: number; insight_type: string }>
     top_recommendations: Array<{ id: string; feature_name: string; priority_score: number }>
-    integrations: Array<{ type: string; status: string; signal_count: number; last_synced_at: string }>
+    integrations: Array<{ provider: string; status: string; signal_count: number; last_synced_at: string }>
     last_analyzed_at: string | null
     new_signals_count: number
     workspace_settings: any
@@ -243,9 +243,9 @@ export default function DashboardPage() {
                     <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 border-t border-[var(--border-subtle)]">
                         {stats?.integrations && stats.integrations.length > 0 ? (
                             stats.integrations.map(intg => (
-                                <div key={intg.type} className="flex flex-col gap-2 p-3 rounded-lg bg-[var(--bg-tertiary)]/50 border border-[var(--border-subtle)] hover:border-blue-500/30 transition-colors">
+                                <div key={intg.provider} className="flex flex-col gap-2 p-3 rounded-lg bg-[var(--bg-tertiary)]/50 border border-[var(--border-subtle)] hover:border-blue-500/30 transition-colors">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-semibold capitalize text-[var(--text-primary)] tracking-tight">{intg.type}</span>
+                                        <span className="text-xs font-semibold capitalize text-[var(--text-primary)] tracking-tight">{intg.provider}</span>
                                         <Badge variant="success" className="h-4 px-1.5 text-[8px] uppercase tracking-tighter">
                                             Active
                                         </Badge>

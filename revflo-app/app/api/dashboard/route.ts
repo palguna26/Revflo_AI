@@ -35,8 +35,8 @@ export async function GET() {
                 .select('id', { count: 'exact', head: true })
                 .eq('workspace_id', wid),
             supabase
-                .from('integrations')
-                .select('type, status, signal_count, last_synced_at')
+                .from('workspace_integrations')
+                .select('provider, status, signal_count, last_synced_at')
                 .eq('workspace_id', wid),
         ])
 

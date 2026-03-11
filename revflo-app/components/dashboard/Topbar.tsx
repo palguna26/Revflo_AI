@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Search, Bell, Plus } from "lucide-react";
+import Link from "next/link";
 
 export function Topbar() {
   const path = usePathname();
@@ -31,10 +32,10 @@ export function Topbar() {
           <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[var(--accent)] rounded-full border border-[var(--bg-primary)]"></span>
         </button>
         <div className="w-[1px] h-4 bg-[var(--border-subtle)] mx-1"></div>
-        <button className="linear-button-primary">
+        <Link href="/dashboard/analysis" className="linear-button-primary">
           <Plus size={14} />
           <span>New Analysis</span>
-        </button>
+        </Link>
       </div>
     </header>
   );
