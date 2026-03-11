@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { Rocket, BarChart3, Lightbulb, Zap, Share2, ArrowRight, RefreshCw, AlertCircle, CheckCircle2, Inbox } from 'lucide-react'
 
 interface Stats {
     workspace: { id: string; name: string }
@@ -17,17 +20,16 @@ interface Stats {
     workspace_settings: any
 }
 
-const INSIGHT_TYPE_COLOR: Record<string, string> = {
+const INSIGHT_TYPE_ICON: Record<string, any> = {
+    opportunity: Rocket,
+    risk: AlertCircle,
+    trend: BarChart3,
+}
+
+const INSIGHT_TYPE_STYLE: Record<string, string> = {
     opportunity: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
     risk: 'text-red-400 bg-red-400/10 border-red-400/20',
     trend: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-}
-
-const SOURCE_ICON: Record<string, string> = {
-    github: '◈',
-    linear: '◆',
-    stripe: '◇',
-    feedback: '◎',
 }
 
 export default function DashboardPage() {
@@ -58,11 +60,11 @@ export default function DashboardPage() {
             const res = await fetch('/api/analysis/run', { method: 'POST' })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error)
-            setMessage('✓ Analysis complete — insights and recommendations generated!')
+            setMessage('Analysis complete')
             await fetchStats()
         } catch (e: unknown) {
             const msg = e instanceof Error ? e.message : 'Analysis failed'
-            setMessage('✗ ' + msg)
+            setMessage(msg)
         } finally {
             setRunning(false)
         }
@@ -70,203 +72,202 @@ export default function DashboardPage() {
 
     useEffect(() => { fetchStats() }, [])
 
-    const statCards = stats ? [
-        { label: 'Product Signals', value: stats.signal_count, color: 'from-indigo-500/20 to-purple-500/20', border: 'border-indigo-500/30' },
-        { label: 'Insights Generated', value: stats.insight_count, color: 'from-emerald-500/20 to-teal-500/20', border: 'border-emerald-500/30' },
-        { label: 'Build Decisions', value: stats.recommendation_count, color: 'from-amber-500/20 to-orange-500/20', border: 'border-amber-500/30' },
-        { label: 'PRDs Created', value: stats.prd_count, color: 'from-blue-500/20 to-cyan-500/20', border: 'border-blue-500/30' },
-    ] : []
-
-    return (
-        <div className="p-6 max-w-6xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-start justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-white">Product Intelligence</h1>
-                    <div className="flex items-center gap-3 mt-0.5">
-                        <p className="text-sm text-neutral-500">
-                            {stats?.workspace.name ?? 'Loading workspace...'}
-                        </p>
-                        {stats?.last_analyzed_at && (
-                            <span className="text-[10px] text-neutral-600 bg-white/5 px-2 py-0.5 rounded border border-white/10">
-                                Last analyzed: {new Date(stats.last_analyzed_at).toLocaleDateString()}
-                            </span>
-                        )}
-                        {stats?.workspace_settings?.auto_analyze && (
-                            <span className="text-[10px] text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/20">
-                                Auto-analyze ON
-                            </span>
-                        )}
-                    </div>
+    if (loading && !stats) {
+        return (
+            <div className="space-y-8 animate-in fade-in duration-500">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-24 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg animate-pulse" />
+                    ))}
                 </div>
-                <div className="flex items-center gap-4">
-                    {stats && stats.new_signals_count > 0 && (
-                        <div className="text-xs text-neutral-400">
-                            <span className="font-medium text-white">{stats.new_signals_count}</span> new signals since last analysis
-                        </div>
-                    )}
-                    <button
-                        onClick={runAnalysis}
-                        disabled={running || !stats || stats.signal_count === 0}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${stats?.new_signals_count && stats.new_signals_count >= 5
-                                ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                                : 'bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed'
-                            }`}
-                    >
-                        {running ? (
-                            <>
-                                <span className="animate-spin">◌</span>
-                                Running Analysis...
-                            </>
-                        ) : stats?.new_signals_count && stats.new_signals_count >= 5 ? (
-                            <>◆ {stats.new_signals_count} new signals — refresh analysis</>
-                        ) : (
-                            <>◆ Run AI Analysis</>
-                        )}
-                    </button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="h-64 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg animate-pulse" />
+                    <div className="h-64 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg animate-pulse" />
                 </div>
             </div>
+        )
+    }
 
-            {/* Status message */}
-            {message && (
-                <div className={`px-4 py-2.5 rounded-lg text-sm border ${message.startsWith('✓') ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
-                    {message}
-                </div>
-            )}
-
-            {/* No signals CTA */}
-            {!loading && stats && stats.signal_count === 0 && (
-                <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
-                    <p className="text-neutral-400 text-sm">No signals yet. Connect integrations to start analyzing your product.</p>
-                    <a href="/dashboard/integrations" className="mt-3 inline-flex items-center gap-1.5 text-indigo-400 text-sm hover:text-indigo-300">
-                        ⊕ Connect Integrations →
-                    </a>
-                </div>
-            )}
-
-            {/* Stat Cards - Only show if analysis has run */}
-            {!loading && stats && stats.signal_count > 0 && (stats.insight_count > 0 || stats.recommendation_count > 0 || stats.prd_count > 0) && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {statCards.map(card => (
-                        <div key={card.label} className={`rounded-xl border ${card.border} bg-gradient-to-br ${card.color} p-4`}>
-                            <p className="text-xs text-neutral-500 font-medium">{card.label}</p>
-                            <p className="text-3xl font-bold text-white mt-1">{card.value}</p>
+    return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {/* Run Analysis Alert */}
+            {stats && stats.new_signals_count >= 5 && (
+                <div className="bg-[var(--bg-secondary)] border border-indigo-500/30 rounded-lg p-5 flex items-center justify-between shadow-sm animate-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                            <Zap size={20} />
                         </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Zero state for stats - when signals exist but analysis hasn't been run */}
-            {!loading && stats && stats.signal_count > 0 && stats.insight_count === 0 && stats.recommendation_count === 0 && stats.prd_count === 0 && (
-                <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-8 text-center">
-                    <h3 className="text-lg font-medium text-white mb-2">Ready to Analyze</h3>
-                    <p className="text-neutral-400 text-sm mb-4">Run your first AI Analysis to generate insights, decisions, and PRDs from your connected signals.</p>
-                    <button
+                        <div>
+                            <p className="text-sm font-medium text-[var(--text-primary)]">New intelligence available</p>
+                            <p className="text-xs text-[var(--text-tertiary)]">{stats.new_signals_count} new product signals processed. Re-analyze to refresh insights.</p>
+                        </div>
+                    </div>
+                    <Button 
                         onClick={runAnalysis}
                         disabled={running}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors"
+                        variant="primary"
+                        className="gap-2"
                     >
-                        {running ? 'Running Analysis...' : '◆ Run AI Analysis'}
+                        {running ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />}
+                        Run Analysis
+                    </Button>
+                </div>
+            )}
+
+            {/* Status Message */}
+            {message && (
+                <div className={`px-4 py-3 rounded-lg border flex items-center gap-3 animate-in slide-in-from-top-1 duration-300 ${
+                    message.includes('failed') ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                }`}>
+                    {message.includes('failed') ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
+                    <span className="text-sm">{message}</span>
+                    <button onClick={() => setMessage('')} className="ml-auto text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]">
+                        <span className="text-xs">Dismiss</span>
                     </button>
                 </div>
             )}
 
-            {loading && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[...Array(4)].map((_, i) => (
-                        <div key={i} className="rounded-xl border border-white/5 bg-white/5 p-4 h-20 animate-pulse" />
-                    ))}
-                </div>
-            )}
-
-            {/* Main Content */}
-            {stats && stats.signal_count > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* Signal Breakdown */}
-                    <div className="rounded-xl border border-white/5 bg-white/5 p-4">
-                        <h2 className="text-sm font-semibold text-white mb-3">Signal Sources</h2>
-                        <div className="space-y-2">
-                            {Object.entries(stats.signal_breakdown).map(([source, count]) => {
-                                const pct = Math.round((count / stats.signal_count) * 100)
-                                return (
-                                    <div key={source}>
-                                        <div className="flex justify-between text-xs mb-1">
-                                            <span className="text-neutral-400 capitalize">{SOURCE_ICON[source] ?? '○'} {source}</span>
-                                            <span className="text-neutral-500">{count} signals</span>
-                                        </div>
-                                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${pct}%` }} />
-                                        </div>
-                                    </div>
-                                )
-                            })}
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                    { label: 'Signals', value: stats?.signal_count, icon: BarChart3, color: 'text-indigo-400' },
+                    { label: 'Insights', value: stats?.insight_count, icon: Lightbulb, color: 'text-amber-400' },
+                    { label: 'Decisions', value: stats?.recommendation_count, icon: Zap, color: 'text-blue-400' },
+                    { label: 'PRDs', value: stats?.prd_count, icon: Rocket, color: 'text-emerald-400' },
+                ].map((stat) => (
+                    <div key={stat.label} className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg p-5 hover:border-[var(--border-strong)] transition-all group">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-[11px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">{stat.label}</span>
+                            <stat.icon size={16} className={`${stat.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
                         </div>
+                        <div className="text-3xl font-semibold tracking-tighter text-[var(--text-primary)]">{stat.value || 0}</div>
                     </div>
+                ))}
+            </div>
 
-                    {/* Integrations */}
-                    <div className="rounded-xl border border-white/5 bg-white/5 p-4">
-                        <h2 className="text-sm font-semibold text-white mb-3">Connected Sources</h2>
-                        {stats.integrations.length === 0 ? (
-                            <p className="text-xs text-neutral-500">No integrations connected yet.</p>
+            {/* Main Sections */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Recent Insights */}
+                <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg overflow-hidden flex flex-col shadow-sm">
+                    <div className="px-5 py-4 flex items-center justify-between bg-[var(--bg-secondary)]">
+                        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Recent Insights</h3>
+                        <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="text-xs h-7 gap-1"
+                            onClick={() => window.location.href = '/dashboard/insights'}
+                        >
+                            View all <ArrowRight size={12} />
+                        </Button>
+                    </div>
+                    <div className="flex-1 p-2 border-t border-[var(--border-subtle)]">
+                        {stats?.top_insights && stats.top_insights.length > 0 ? (
+                            <div className="space-y-0.5">
+                                {stats.top_insights.map(insight => {
+                                    return (
+                                        <div key={insight.id} className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[var(--bg-hover)] transition-colors group cursor-pointer">
+                                            <Badge variant={insight.insight_type as any} className="capitalize w-20 justify-center">
+                                                {insight.insight_type}
+                                            </Badge>
+                                            <span className="text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate flex-1">
+                                                {insight.title}
+                                            </span>
+                                            <span className="text-[11px] text-[var(--text-tertiary)] font-mono opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {insight.confidence_score}% Match
+                                            </span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         ) : (
-                            <div className="space-y-2">
-                                {stats.integrations.map(intg => (
-                                    <div key={intg.type} className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-indigo-400 text-sm">{SOURCE_ICON[intg.type] ?? '○'}</span>
-                                            <span className="text-sm text-neutral-300 capitalize">{intg.type}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-neutral-500">{intg.signal_count} signals</span>
-                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">active</span>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div className="h-40 flex flex-col items-center justify-center text-[var(--text-tertiary)] text-sm border border-dashed border-[var(--border-subtle)] m-2 rounded">
+                                <Lightbulb size={24} className="mb-2 opacity-20" />
+                                No insights generated yet.
                             </div>
                         )}
                     </div>
-
-                    {/* Top Insights */}
-                    {stats.top_insights.length > 0 && (
-                        <div className="rounded-xl border border-white/5 bg-white/5 p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-sm font-semibold text-white">Recent Insights</h2>
-                                <a href="/dashboard/insights" className="text-xs text-indigo-400 hover:text-indigo-300">View all →</a>
-                            </div>
-                            <div className="space-y-2">
-                                {stats.top_insights.map(insight => (
-                                    <div key={insight.id} className="flex items-center gap-2">
-                                        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${INSIGHT_TYPE_COLOR[insight.insight_type] ?? 'text-neutral-400 bg-neutral-400/10 border-neutral-400/20'}`}>
-                                            {insight.insight_type}
-                                        </span>
-                                        <span className="text-sm text-neutral-300 truncate">{insight.title}</span>
-                                        <span className="text-xs text-neutral-500 ml-auto shrink-0">{insight.confidence_score}%</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Top Recommendations */}
-                    {stats.top_recommendations.length > 0 && (
-                        <div className="rounded-xl border border-white/5 bg-white/5 p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-sm font-semibold text-white">Top Build Decisions</h2>
-                                <a href="/dashboard/analysis" className="text-xs text-indigo-400 hover:text-indigo-300">View all →</a>
-                            </div>
-                            <div className="space-y-2">
-                                {stats.top_recommendations.map((rec, i) => (
-                                    <div key={rec.id} className="flex items-center gap-2">
-                                        <span className="text-xs text-neutral-600 w-4">#{i + 1}</span>
-                                        <span className="text-sm text-neutral-300 truncate">{rec.feature_name}</span>
-                                        <span className="text-xs text-amber-400 ml-auto shrink-0">{rec.priority_score}/100</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
-            )}
+
+                {/* Build Decisions */}
+                <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg overflow-hidden flex flex-col shadow-sm">
+                    <div className="px-5 py-4 flex items-center justify-between bg-[var(--bg-secondary)]">
+                        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Priority Features</h3>
+                        <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="text-xs h-7 gap-1"
+                            onClick={() => window.location.href = '/dashboard/analysis'}
+                        >
+                            View all <ArrowRight size={12} />
+                        </Button>
+                    </div>
+                    <div className="flex-1 p-2 border-t border-[var(--border-subtle)]">
+                        {stats?.top_recommendations && stats.top_recommendations.length > 0 ? (
+                            <div className="space-y-0.5">
+                                {stats.top_recommendations.map((rec, i) => (
+                                    <div key={rec.id} className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-[var(--bg-hover)] transition-colors group cursor-pointer">
+                                        <div className="flex flex-col items-center justify-center w-6 h-6 rounded bg-[var(--bg-tertiary)] group-hover:bg-indigo-500/10 group-hover:text-indigo-400 transition-colors">
+                                            <span className="text-[10px] font-mono leading-none">{i + 1}</span>
+                                        </div>
+                                        <span className="text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate flex-1 leading-tight">
+                                            {rec.feature_name}
+                                        </span>
+                                        <div className="h-1 w-16 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                                            <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${rec.priority_score}%` }}></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="h-40 flex flex-col items-center justify-center text-[var(--text-tertiary)] text-sm border border-dashed border-[var(--border-subtle)] m-2 rounded">
+                                <Zap size={24} className="mb-2 opacity-20" />
+                                No build decisions available.
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Sources & Integrations */}
+                <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg overflow-hidden flex flex-col shadow-sm lg:col-span-2">
+                    <div className="px-5 py-4 flex items-center justify-between bg-[var(--bg-secondary)]">
+                        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Connected Data Ingestion</h3>
+                        <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="text-xs h-7 gap-1"
+                            onClick={() => window.location.href = '/dashboard/integrations'}
+                        >
+                            Manage Sources <ArrowRight size={12} />
+                        </Button>
+                    </div>
+                    <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 border-t border-[var(--border-subtle)]">
+                        {stats?.integrations && stats.integrations.length > 0 ? (
+                            stats.integrations.map(intg => (
+                                <div key={intg.type} className="flex flex-col gap-2 p-3 rounded-lg bg-[var(--bg-tertiary)]/50 border border-[var(--border-subtle)] hover:border-blue-500/30 transition-colors">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-semibold capitalize text-[var(--text-primary)] tracking-tight">{intg.type}</span>
+                                        <Badge variant="success" className="h-4 px-1.5 text-[8px] uppercase tracking-tighter">
+                                            Active
+                                        </Badge>
+                                    </div>
+                                    <div className="flex items-baseline gap-1 mt-1">
+                                        <span className="text-xl font-bold tracking-tighter text-[var(--text-primary)]">{intg.signal_count}</span>
+                                        <span className="text-[10px] text-[var(--text-tertiary)] font-medium">signals</span>
+                                    </div>
+                                    <div className="h-1 bg-[var(--bg-tertiary)] rounded-full overflow-hidden mt-2">
+                                        <div className="h-full bg-blue-500/40 rounded-full" style={{ width: '65%' }}></div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="md:col-span-2 lg:col-span-4 h-32 flex flex-col items-center justify-center text-[var(--text-tertiary)] text-sm border border-dashed border-[var(--border-subtle)] rounded-lg m-2">
+                                <Share2 size={32} className="mb-2 opacity-10" />
+                                No signal sources connected.
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

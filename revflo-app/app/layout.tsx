@@ -10,15 +10,22 @@ export const metadata: Metadata = {
   keywords: ["product management", "AI", "roadmap", "product analytics"],
 };
 
+import { PostHogProvider } from "@/components/providers/PostHogProvider";
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} bg-black text-white antialiased`}>
-        {children}
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body 
+        className={`${inter.className} bg-[var(--bg-primary)] text-[var(--text-primary)] antialiased`}
+        suppressHydrationWarning
+      >
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

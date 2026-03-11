@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import { Github, Layout, FileText, CheckCircle2, AlertCircle, RefreshCw, Plus, ArrowRight, Share2, Globe } from 'lucide-react'
 
 interface Integration {
     provider: string
@@ -9,10 +10,10 @@ interface Integration {
     last_synced_at?: string | null
 }
 
-const INTEGRATION_LABELS: Record<string, { name: string; icon: string; description: string; color: string }> = {
-    github: { name: 'GitHub', icon: '◈', description: 'PRs, commits, and engineering activity', color: 'indigo' },
-    linear: { name: 'Linear', icon: '◆', description: 'Issues, roadmap items, and priorities', color: 'violet' },
-    csv: { name: 'Customer Feedback', icon: '◎', description: 'Upload raw CSV feedback files', color: 'amber' },
+const INTEGRATION_LABELS: Record<string, { name: string; icon: any; description: string; color: string }> = {
+    github: { name: 'GitHub', icon: Github, description: 'Import PRs, commits, and engineering velocity metrics.', color: 'text-indigo-400' },
+    linear: { name: 'Linear', icon: Layout, description: 'Import issues, roadmap progress, and team sentiment.', color: 'text-blue-400' },
+    csv: { name: 'Customer Feedback', icon: FileText, description: 'Upload raw CSV feedback from surveys or support logs.', color: 'text-amber-400' },
 }
 
 function IntegrationCard({
@@ -38,7 +39,7 @@ function IntegrationCard({
     }
 
     async function handleSync() {
-        if (type === 'csv') return // Handled via upload
+        if (type === 'csv') return
         setLoading(true)
         setMessage('')
         try {
@@ -83,36 +84,30 @@ function IntegrationCard({
         }
     }
 
-    const colorMap: Record<string, string> = {
-        indigo: 'border-indigo-500/30 bg-indigo-500/5',
-        violet: 'border-violet-500/30 bg-violet-500/5',
-        amber: 'border-amber-500/30 bg-amber-500/5',
-    }
-
-    const iconColorMap: Record<string, string> = {
-        indigo: 'text-indigo-400',
-        violet: 'text-violet-400',
-        amber: 'text-amber-400',
-    }
+    const Icon = cfg.icon
 
     return (
-        <div className={`rounded-xl border p-5 ${colorMap[cfg.color]}`}>
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg p-5 hover:border-[var(--border-strong)] transition-all flex flex-col group">
             <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                    <span className={`text-lg ${iconColorMap[cfg.color]}`}>{cfg.icon}</span>
-                    <div>
-                        <h3 className="text-sm font-semibold text-white">{cfg.name}</h3>
-                        <p className="text-xs text-neutral-500">{cfg.description}</p>
-                    </div>
+                <div className="h-10 w-10 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center border border-[var(--border-subtle)] group-hover:bg-[var(--bg-secondary)] transition-colors">
+                    <Icon size={20} className={cfg.color} />
                 </div>
                 {existing && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        Total {existing.signal_count} signals
-                    </span>
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            Connected
+                        </span>
+                        <span className="text-[10px] text-[var(--text-tertiary)] mt-1">{existing.signal_count} signals</span>
+                    </div>
                 )}
             </div>
 
-            {/* Inputs / Upload */}
+            <div className="mb-6 flex-1">
+                <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">{cfg.name}</h3>
+                <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">{cfg.description}</p>
+            </div>
+
             {type === 'csv' && (
                 <div className="mb-4">
                     <input
@@ -121,40 +116,58 @@ function IntegrationCard({
                         ref={fileInputRef}
                         onChange={handleFileUpload}
                         disabled={loading}
-                        className="w-full text-xs text-neutral-400 file:mr-2 file:text-xs file:bg-white/10 file:text-white file:border-0 file:rounded file:px-3 file:py-1.5 file:cursor-pointer file:hover:bg-white/20 transition-colors"
+                        className="hidden"
                     />
+                    <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={loading}
+                        className="w-full py-1.5 px-3 rounded text-[11px] font-medium border border-dashed border-[var(--border-subtle)] hover:border-[var(--border-strong)] transition-colors text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                    >
+                        {loading ? 'Ingesting...' : 'Select CSV file'}
+                    </button>
                 </div>
             )}
 
             {message && (
-                <p className={`text-xs mb-3 font-medium ${message.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>
+                <div className={`flex items-center gap-2 mb-4 p-2 rounded text-[11px] font-medium ${
+                    message.startsWith('✓') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/10' : 'bg-red-500/10 text-red-400 border border-red-500/10'
+                }`}>
+                    {message.startsWith('✓') ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                    {message}
+                </div>
             )}
 
-            <div className="flex items-center gap-3">
-                {type === 'csv' ? null : existing ? (
-                    <button
-                        onClick={handleSync}
-                        disabled={loading}
-                        className="w-full py-1.5 rounded-lg border text-xs font-medium transition-colors bg-white/5 hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        {loading ? '⟳ Syncing...' : '⟳ Sync Now'}
-                    </button>
+            <div className="flex items-center gap-2">
+                {existing ? (
+                    <>
+                        <button
+                            onClick={handleSync}
+                            disabled={loading}
+                            className="linear-button-secondary flex-1 py-1 px-2 h-8 text-[11px]"
+                        >
+                            {loading ? <RefreshCw className="animate-spin" size={12} /> : <RefreshCw size={12} />}
+                            Sync Now
+                        </button>
+                        <button className="h-8 w-8 rounded flex items-center justify-center border border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-tertiary)]">
+                            <Globe size={13} />
+                        </button>
+                    </>
                 ) : (
                     <button
                         onClick={handleConnect}
                         disabled={loading}
-                        className={`w-full py-1.5 rounded-lg text-xs font-medium transition-colors text-white ${type === 'github' ? 'bg-[#24292e] hover:bg-[#2f363d]' : 'bg-[#5e6ad2] hover:bg-[#6c78e6]'
-                            }`}
+                        className="linear-button-primary flex-1 py-1 px-2 h-8 text-[11px]"
                     >
-                        ⊕ Connect {cfg.name}
+                        <Plus size={12} />
+                        Connect
                     </button>
                 )}
             </div>
 
             {existing?.last_synced_at && (
-                <p className="text-[10px] text-neutral-500 mt-2.5 text-center">
-                    Last activity: {new Date(existing.last_synced_at).toLocaleString()}
-                </p>
+                <span className="text-[10px] text-[var(--text-tertiary)] mt-3 text-center opacity-60">
+                    Synced {new Date(existing.last_synced_at).toLocaleDateString()}
+                </span>
             )}
         </div>
     )
@@ -172,66 +185,80 @@ export default function IntegrationsPage() {
         } catch (e) {
             console.error('Failed to load integrations')
         } finally {
+            setIntegrations(prev => prev) // Trigger re-render even if empty
             setLoading(false)
         }
     }
 
     useEffect(() => {
         loadIntegrations()
-
-        // Handle OAuth success/error callbacks in URL
-        const params = new URLSearchParams(window.location.search)
-        const error = params.get('error')
-        const success = params.get('success')
-
-        if (error) {
-            setTimeout(() => alert(`Integration error: ${error}`), 100)
-            window.history.replaceState({}, '', '/dashboard/integrations')
-        } else if (success) {
-            setTimeout(() => alert(`Successfully integrated ${success.split('_')[0]}!`), 100)
-            window.history.replaceState({}, '', '/dashboard/integrations')
-        }
     }, [])
 
     const totalSignals = integrations.reduce((sum, i) => sum + (i.signal_count ?? 0), 0)
 
     return (
-        <div className="p-6 max-w-4xl mx-auto space-y-5">
-            <div>
-                <h1 className="text-2xl font-bold text-white">Integrations</h1>
-                <p className="text-sm text-neutral-500 mt-0.5">
-                    Connect your tools to collect product signals.
-                    {totalSignals > 0 && <span className="text-indigo-400 ml-1">{totalSignals} signals collected.</span>}
-                </p>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-5xl">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">Integrations</h1>
+                    <p className="text-[var(--text-tertiary)] text-sm mt-1 max-w-xl">
+                        RevFlo parses raw signals from your existing tools to identify product gaps and growth opportunities.
+                    </p>
+                </div>
+                {totalSignals > 0 && (
+                    <div className="flex items-center gap-2 text-[var(--text-tertiary)] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] px-3 py-1.5 rounded-full">
+                        <Share2 size={13} className="text-blue-400" />
+                        <span className="text-xs font-medium"><span className="text-[var(--text-primary)]">{totalSignals}</span> Signals Indexed</span>
+                    </div>
+                )}
             </div>
 
-            {loading ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[...Array(3)].map((_, i) => (
-                        <div key={i} className="rounded-xl border border-white/5 bg-white/5 h-40 animate-pulse" />
-                    ))}
-                </div>
-            ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(['github', 'linear', 'csv']).map(type => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {loading ? (
+                    [...Array(3)].map((_, i) => (
+                        <div key={i} className="h-64 bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg animate-pulse" />
+                    ))
+                ) : (
+                    (['github', 'linear', 'csv']).map(type => (
                         <IntegrationCard
                             key={type}
                             type={type}
                             existing={integrations.find(i => i.provider === type) ?? null}
                             onSync={loadIntegrations}
                         />
-                    ))}
+                    ))
+                )}
+            </div>
+
+            {/* Empty state / CTA */}
+            {!loading && integrations.length === 0 && (
+                <div className="border border-dashed border-[var(--border-subtle)] rounded-xl py-20 flex flex-col items-center justify-center bg-[var(--bg-secondary)]/30">
+                    <div className="h-16 w-16 rounded-2xl bg-[var(--bg-hover)] flex items-center justify-center mb-6 border border-[var(--border-subtle)] text-[var(--text-tertiary)]">
+                        <Plus size={32} strokeWidth={1} />
+                    </div>
+                    <h2 className="text-lg font-medium text-[var(--text-primary)] mb-2">No tools connected</h2>
+                    <p className="text-[var(--text-tertiary)] text-sm max-w-xs text-center mb-8">
+                        Connect at least one tool to start collecting product signals for AI analysis.
+                    </p>
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => window.location.href = '#'} className="linear-button-primary">Browse All Integrations</button>
+                    </div>
                 </div>
             )}
 
+            {/* Analysis CTA */}
             {totalSignals > 0 && (
-                <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 text-center mt-6">
-                    <p className="text-sm text-neutral-300">
-                        <span className="text-indigo-400 font-semibold">{totalSignals} signals</span> collected.{' '}
-                        <a href="/dashboard" className="text-indigo-400 hover:text-indigo-300 underline-offset-2 hover:underline">
-                            Go to Dashboard to run AI analysis →
-                        </a>
-                    </p>
+                <div className="bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-indigo-500/10 rounded-xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 className="text-lg font-medium text-[var(--text-primary)] mb-1">Signals are ready for processing</h3>
+                        <p className="text-[var(--text-tertiary)] text-sm">Your connected tools have provided {totalSignals} signals. Start your AI analysis to reveal growth insights.</p>
+                    </div>
+                    <button 
+                        onClick={() => window.location.href = '/dashboard'}
+                        className="linear-button-primary"
+                    >
+                        Go to Overview <ArrowRight size={14} className="ml-1" />
+                    </button>
                 </div>
             )}
         </div>

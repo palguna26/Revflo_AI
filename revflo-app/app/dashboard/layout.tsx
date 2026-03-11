@@ -1,4 +1,5 @@
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
+import { Topbar } from "@/components/dashboard/Topbar";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -17,13 +18,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
 
     return (
-        <div className="flex h-screen bg-[#0A0A0A] overflow-hidden text-neutral-300">
+        <div className="flex h-screen bg-[var(--bg-primary)] overflow-hidden text-[var(--text-primary)] font-sans">
             <SidebarNav userEmail={userEmail} />
 
-            {/* Main */}
-            <main className="flex-1 overflow-y-auto bg-black">
-                {children}
-            </main>
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                <Topbar />
+                <main className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10">
+                    <div className="max-w-[1200px] mx-auto">
+                        {children}
+                    </div>
+                </main>
+            </div>
         </div>
     );
 }

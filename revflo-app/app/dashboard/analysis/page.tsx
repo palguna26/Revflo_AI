@@ -1,6 +1,21 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { ListItem } from '@/components/ui/ListItem'
+import { 
+    CheckCircle2, 
+    Circle, 
+    FileText, 
+    Hammer, 
+    MessageSquare, 
+    ChevronDown, 
+    ChevronRight,
+    Play,
+    Clock,
+    MoreHorizontal
+} from 'lucide-react'
 
 interface EngineeringPlan {
     id: string
@@ -56,16 +71,10 @@ function getEngPlan(rec: Recommendation): EngineeringPlan | null {
         : prd.engineering_plans
 }
 
-function priorityColor(score: number) {
-    if (score >= 80) return 'text-red-400 bg-red-400/10 border-red-400/20'
-    if (score >= 60) return 'text-amber-400 bg-amber-400/10 border-amber-400/20'
-    return 'text-blue-400 bg-blue-400/10 border-blue-400/20'
-}
-
-function priorityLabel(score: number) {
-    if (score >= 80) return 'P0 Critical'
-    if (score >= 60) return 'P1 High'
-    return 'P2 Medium'
+function priorityVariant(score: number): any {
+    if (score >= 80) return 'risk'
+    if (score >= 60) return 'trend'
+    return 'opportunity'
 }
 
 export default function AnalysisPage() {
@@ -199,33 +208,49 @@ export default function AnalysisPage() {
                         const hasDecisions = rec.decision_records && rec.decision_records.length > 0
 
                         return (
-                            <div key={rec.id} className="rounded-xl border border-white/5 bg-white/5 overflow-hidden">
-                                {/* Card Header */}
-                                <button
+                            <div key={rec.id} className="bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-lg overflow-hidden">
+                                <ListItem
                                     onClick={() => toggleExpand(rec.id)}
-                                    className="w-full text-left p-5 hover:bg-white/[0.03] transition-colors"
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <span className="text-xl text-neutral-600 font-bold shrink-0 w-6">#{i + 1}</span>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                                                <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${priorityColor(rec.priority_score)}`}>
-                                                    {priorityLabel(rec.priority_score)}
-                                                </span>
-                                                {prd && <span className="text-[10px] px-1.5 py-0.5 rounded border text-indigo-400 bg-indigo-400/10 border-indigo-400/20">PRD Ready</span>}
-                                                {engPlan && <span className="text-[10px] px-1.5 py-0.5 rounded border text-violet-400 bg-violet-400/10 border-violet-400/20">Eng Plan Ready</span>}
-                                                {hasDecisions && <span className="text-[10px] px-1.5 py-0.5 rounded border text-emerald-400 bg-emerald-400/10 border-emerald-400/20">Decision Made</span>}
+                                    icon={
+                                        <div className="flex items-center justify-center w-5 h-5 rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] group-hover:bg-[var(--bg-active)] transition-colors">
+                                            {hasDecisions ? <CheckCircle2 size={12} className="text-emerald-500" /> : <Circle size={12} className="text-[var(--text-tertiary)]" />}
+                                        </div>
+                                    }
+                                    title={
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium">{rec.feature_name}</span>
+                                            <Badge variant={priorityVariant(rec.priority_score)} className="text-[9px] uppercase h-4 px-1">
+                                                P{Math.floor((100 - rec.priority_score) / 20)}
+                                            </Badge>
+                                        </div>
+                                    }
+                                    subtitle={rec.description}
+                                    meta={
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-3">
+                                                {prd && (
+                                                    <div className="flex items-center gap-1 text-[var(--text-tertiary)]">
+                                                        <FileText size={12} />
+                                                        <span className="text-[10px]">PRD</span>
+                                                    </div>
+                                                )}
+                                                {engPlan && (
+                                                    <div className="flex items-center gap-1 text-[var(--text-tertiary)]">
+                                                        <Hammer size={12} />
+                                                        <span className="text-[10px]">Tasks</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <h3 className="text-sm font-semibold text-white">{rec.feature_name}</h3>
-                                            <p className="text-xs text-neutral-500 mt-0.5 line-clamp-2">{rec.description}</p>
+                                            <div className="w-[1px] h-3 bg-[var(--border-subtle)]" />
+                                            <div className="flex items-center gap-1.5 text-[var(--text-secondary)] font-mono text-xs">
+                                                {rec.priority_score}
+                                            </div>
+                                            <div className="text-[var(--text-tertiary)]">
+                                                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col items-end shrink-0 gap-1">
-                                            <span className="text-lg font-bold text-white">{rec.priority_score}</span>
-                                            <span className="text-[9px] text-neutral-600">/ 100</span>
-                                            <span className="text-neutral-600 text-xs">{isExpanded ? '▲' : '▼'}</span>
-                                        </div>
-                                    </div>
-                                </button>
+                                    }
+                                />
 
                                 {/* Expanded Detail */}
                                 {isExpanded && (
